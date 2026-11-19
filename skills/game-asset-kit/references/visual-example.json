@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "project": "货柜与烧烤 · 画面样本",
+  "mode": "library",
+  "coverage": "从四张来源工作台截图各提炼一个可见对象，位置以截图左上角为原点。没有可供核验的游戏源码。",
+  "items": [
+    {
+      "id": "bbq.tomato",
+      "name": "烤番茄",
+      "category": "烧烤食材",
+      "evidence": "visual",
+      "states": ["三消成盘 · 450 ms"],
+      "sources": [{"path": "source-bbq-food.png", "locator": "当前正式版 · 左侧烤炉", "rect": [110, 250, 419, 370], "preview": "成盘动效定格"}]
+    },
+    {
+      "id": "goods.milk",
+      "name": "货架牛奶",
+      "category": "货架商品",
+      "evidence": "visual",
+      "states": ["前排", "后排"],
+      "sources": [{"path": "source-goods-shelf.png", "locator": "正式商品 · 左侧货架", "rect": [300, 227, 358, 214], "preview": "前后排遮挡与落脚点"}]
+    },
+    {
+      "id": "goods.settings-switch",
+      "name": "设置开关",
+      "category": "界面组件",
+      "evidence": "visual",
+      "states": ["开"],
+      "sources": [{"path": "source-goods-ui.png", "locator": "中间卡片 · 开", "rect": [495, 83, 166, 105], "preview": "开启状态"}]
+    },
+    {
+      "id": "bbq.start",
+      "name": "开摊按钮",
+      "category": "界面组件",
+      "evidence": "visual",
+      "sources": [{"path": "source-bbq-ui.png", "locator": "右栏 · 代码组合效果", "rect": [690, 128, 307, 102], "preview": "按钮文字与底座"}]
+    }
+  ]
+}
