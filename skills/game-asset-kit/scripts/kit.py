@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path, PurePosixPath
 import struct
 import sys
@@ -162,9 +163,33 @@ def merge(catalog, previous, project, out):
     return {**catalog, "items": result, "files": files}
 
 
+def read_presentation(out):
+    path = out / "presentation.json"
+    if not path.exists():
+        return {}
+    view = read_json(path)
+    require(isinstance(view, dict) and view.get("layout") in ("atlas", "compare", "catalog"),
+            "presentation.json 的 layout 需为 atlas、compare 或 catalog")
+    require(string(view.get("basis")), "请填写展示依据 basis")
+    colors = view.get("colors", {})
+    roles = {"paper", "panel", "ink", "accent", "stage"}
+    require(isinstance(colors, dict) and colors.keys() <= roles and all(
+        isinstance(v, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", v) for v in colors.values()),
+        "colors 需要已知颜色角色和六位十六进制色值")
+    for key in ("label", "focus"):
+        require(key not in view or string(view[key]), f"展示字段 {key} 需为非空文本")
+    order = view.get("previewOrder", {})
+    require(isinstance(order, dict) and all(isinstance(labels, list) and all(string(v) for v in labels)
+            for labels in order.values()), "previewOrder 按条目 ID 列出优先图注")
+    primary = view.get("categories", [])
+    require(isinstance(primary, list) and all(string(v) for v in primary), "categories 需要分类名称列表")
+    return view
+
+
 def render(manifest, project, out):
     prefix = quote(Path(os.path.relpath(project, out)).as_posix(), safe="/")
-    data = json.dumps({"root": prefix + "/", "manifest": manifest}, ensure_ascii=False)
+    data = json.dumps({"root": prefix + "/", "manifest": manifest,
+                       "view": read_presentation(out)}, ensure_ascii=False)
     return TEMPLATE.read_text(encoding="utf-8").replace("/*__KIT_DATA__*/", data.replace("<", "\\u003c"))
 
 

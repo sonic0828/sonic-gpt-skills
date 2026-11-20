@@ -1,0 +1,23 @@
+{
+  "layout": "compare",
+  "label": "食材对照台",
+  "basis": "dev/food-kit.css 的炭棕背景、奶油色文字和金色强调与游戏木牌按钮配合。并排查看炉上单份和三消后的成盘。",
+  "colors": {
+    "paper": "#15110e",
+    "panel": "#261c15",
+    "ink": "#fff3e0",
+    "accent": "#f6c257",
+    "stage": "#201711"
+  },
+  "focus": "food.tomato",
+  "categories": [
+    "烧烤食材",
+    "首页控件"
+  ],
+  "previewOrder": {
+    "food.tomato": [
+      "炉上单份",
+      "三消成盘"
+    ]
+  }
+}

@@ -76,6 +76,29 @@ class WorkbenchTest(unittest.TestCase):
         self.assertEqual(self.manifest_path.read_bytes(), before)
         self.assertEqual(page.read_bytes(), html)
 
+    def test_presentation_rebuild_preserves_legacy_notes(self):
+        self.cli("build")
+        manifest = json.loads(self.manifest_path.read_text())
+        manual = {"name": "已命名", "note": "核对来源"}
+        manifest["items"][0]["manual"] = manual
+        self.manifest_path.write_text(json.dumps(manifest))
+        config = self.out / "presentation.json"
+        view = {"layout": "compare", "basis": "对照两种状态", "colors": {"stage": "#261c15"}}
+        config.write_text(json.dumps(view))
+        self.assertEqual(self.item_after_build()["manual"], manual)
+        original_page = (self.out / "index.html").read_text()
+        view["layout"] = "atlas"
+        config.write_text(json.dumps(view))
+        self.cli("check", success=False)
+        self.assertEqual(self.item_after_build()["manual"], manual)
+        updated_page = (self.out / "index.html").read_text()
+        self.assertNotEqual(updated_page, original_page)
+        self.assertEqual(json.loads(config.read_text()), view)
+        view["colors"]["stage"] = "invalid"
+        config.write_text(json.dumps(view))
+        self.cli("build", success=False)
+        self.assertEqual((self.out / "index.html").read_text(), updated_page)
+
     def test_shared_atlas_and_region_bounds(self):
         (self.project / "atlas.png").write_bytes(base64.b64decode(
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOt8AAAAASUVORK5CYII="))

@@ -5,35 +5,86 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>游戏资产库</title>
 <style>
-:root{color-scheme:light;--paper:#f6f6f0;--ink:#192d27;--line:#d6dcd1;--muted:#52685c;--accent:#196343;--green:#193c31;--mint:#c8ecaf}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 "DM Sans","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
-button,input{font:inherit;color:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #dc961d;outline-offset:2px}
-a{color:var(--accent);overflow-wrap:anywhere}h1,h2,h3,p,figure,dl,dd{margin:0}.layout{min-height:100vh;display:grid;grid-template-columns:205px minmax(0,1fr)}
-nav{background:var(--green);color:#edf5e9;padding:26px 16px}.brand{display:flex;gap:12px;align-items:center;font-size:18px;font-weight:700;margin:0 4px 45px}
-.mark{width:26px;height:26px;border:2px solid var(--mint);border-radius:4px;box-shadow:inset 0 -6px var(--green),inset 0 -8px var(--mint);transform:rotate(-6deg)}
-nav h2{font-size:12px;color:#b6cdbd;font-weight:500;margin:0 10px 10px}.filter{display:flex;align-items:center;justify-content:space-between;gap:12px;background:transparent;color:#edf5e9;border:0;border-radius:5px;padding:9px 12px;text-align:left;width:100%}.filter:hover{background:#254f40}.filter[aria-pressed=true]{background:var(--mint);color:#183526;font-weight:700}.filter small{font:12px ui-monospace,monospace}
-main{min-width:0}.head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:30px clamp(20px,3vw,48px) 23px;background:#fffef9;border-bottom:1px solid var(--line)}
-.mode{font-size:13px;color:var(--accent);font-weight:650}.head h1{font-size:clamp(24px,3vw,40px);letter-spacing:-.055em;line-height:1.3;margin:4px 0 7px}.totals{color:var(--muted);font-size:13px}.find{display:flex;align-items:center;gap:8px;border:1px solid #bdc8bb;background:white;padding:9px 12px;border-radius:6px}.find span{color:var(--muted);font-size:19px}.find input{width:clamp(140px,17vw,260px);max-width:100%;border:0;background:none;min-width:0}.coverage{padding:11px clamp(20px,3vw,48px);color:var(--muted);border-bottom:1px solid var(--line);font-size:13px}.coverage summary{cursor:pointer}.coverage p{max-width:100ch;margin:8px 0;white-space:pre-wrap}
-.workspace{display:grid;grid-template-columns:minmax(220px,.84fr) minmax(340px,1.65fr);align-items:start}.inventory{padding:22px clamp(12px,1.8vw,30px)}.inventory header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}.inventory h2{font-size:18px}.inventory header span{font-size:13px;color:var(--muted)}.cards{display:grid;gap:7px;max-height:calc(100vh - 231px);min-height:250px;overflow:auto;padding:3px}
-.card{display:flex;align-items:center;gap:12px;text-align:left;min-width:0;background:#fffefb;border:1px solid var(--line);border-radius:6px;padding:8px}.card[aria-current=true]{background:#e8f1df;border-color:#598668;box-shadow:inset 3px 0 0 var(--accent)}.card strong,.card small{display:block;overflow-wrap:anywhere}.card strong{font-size:15px}.card small{font-size:12px;color:var(--muted);margin-top:3px}
-.thumb{flex:0 0 52px;height:52px;display:grid;place-items:center;background:#edf0e5;border-radius:4px;overflow:hidden;color:#617766;font:600 13px ui-monospace,monospace}.thumb img,.thumb canvas{width:100%;height:100%;object-fit:contain}.detail{min-width:0;padding:24px clamp(20px,3vw,48px) 32px;background:#fffef9;border-left:1px solid var(--line);min-height:calc(100vh - 180px);overflow-wrap:anywhere}.detail h2{font-size:clamp(22px,2vw,31px);letter-spacing:-.04em;margin:4px 0 1px}.id{font:12px ui-monospace,monospace;color:var(--muted)}.tags{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.tag{font-size:12px;background:#ecf2e7;border-radius:4px;padding:3px 8px;color:#34573e}.tag.warn{background:#f5e4c6;color:#795319}
-.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:12px;margin-top:18px}.media{height:clamp(158px,24vh,290px);padding:12px;background-color:#ecede5;background-image:linear-gradient(45deg,#e2e6dc 25%,transparent 25%,transparent 75%,#e2e6dc 75%),linear-gradient(45deg,#e2e6dc 25%,transparent 25%,transparent 75%,#e2e6dc 75%);background-position:0 0,7px 7px;background-size:14px 14px;border-radius:5px;display:grid;place-items:center;overflow:hidden}.media img,.media canvas,.media video{width:100%;height:100%;min-height:0;object-fit:contain}.media audio{max-width:100%;width:100%}.error{font-size:12px;color:#704e22}.gallery figcaption{font-size:13px;margin-top:5px;color:var(--muted)}
-.detail section{margin-top:20px}.detail h3{font-size:14px;margin-bottom:7px}.ref{padding:8px 0;border-top:1px solid var(--line);font-size:13px}.ref strong{display:block}.ref code{font:12px ui-monospace,monospace;color:var(--muted);display:block}.note{white-space:pre-wrap}.empty{padding:20px 5px;color:var(--muted)}.path{font:13px ui-monospace,monospace}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-@media(min-width:1600px){.workspace{grid-template-columns:minmax(360px,1fr) minmax(520px,1.6fr)}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:1050px){.layout{grid-template-columns:156px minmax(0,1fr)}nav{padding-inline:10px}.brand{font-size:16px}.workspace{grid-template-columns:minmax(200px,.85fr) minmax(300px,1.45fr)}}
-@media(max-width:760px){.layout,.workspace{display:block}nav{padding:12px 15px}.brand{margin:0 0 10px}.mark{width:20px;height:20px}nav h2{display:none}#filters{display:flex;gap:4px;overflow:auto}.filter{width:auto;white-space:nowrap;gap:8px}.head{flex-wrap:wrap;padding:18px}.find{width:100%}.find input{width:100%}.inventory{padding:15px}.cards{max-height:245px;min-height:0;grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}.thumb{flex-basis:40px;height:40px}.detail{min-height:0;border:0;border-top:1px solid var(--line)}}
+:root {
+  --paper:#f4f4f2; --panel:#ffffff; --ink:#232528; --accent:#445468; --stage:#ececea;
+  --line:color-mix(in srgb,var(--ink) 18%,var(--panel));
+  --muted:color-mix(in srgb,var(--ink) 72%,var(--panel));
+  --wash:color-mix(in srgb,var(--accent) 12%,var(--panel));
+  font:15px/1.5 "DM Sans","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  background:var(--paper); color:var(--ink)
+}
+*{box-sizing:border-box}body,figure,h1,h2,h3,p{margin:0}
+button,input,select{font:inherit;color:inherit}button,summary,select{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a,.mode,.gallery figcaption{color:var(--accent)}a,.detail,.card{overflow-wrap:anywhere}
+main{max-width:1700px;margin:auto;padding:0 clamp(16px,3vw,52px) 36px}
+.head{display:flex;align-items:center;justify-content:space-between;padding:23px 0 17px;gap:20px}
+.mode,.totals,.id,#count,figcaption,.ref,.coverage,.filter,.more{font-size:13px}
+.mode{font-weight:700}.head h1{font-size:clamp(26px,3vw,42px);letter-spacing:-.045em}
+.totals,.id,#count,.coverage,.ref code,.card small,.empty{color:var(--muted)}
+.find{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.find input{border:0;background:transparent;width:clamp(150px,20vw,300px)}input::placeholder{color:var(--muted)}
+nav{display:flex;align-items:center;gap:12px;border-block:1px solid var(--line);padding:9px 0;flex-wrap:wrap}#filters{display:flex;gap:5px;flex-wrap:wrap}
+.filter,.more{background:transparent;color:var(--ink);border:1px solid transparent;border-radius:6px;padding:6px 10px}
+.more{background:var(--panel);border-color:var(--line);max-width:100%}
+.filter small{padding-left:7px;opacity:.8}.filter[aria-pressed=true],.card[aria-current=true]{background:var(--wash);border-color:var(--accent)}
+.coverage{margin:0 0 0 auto}.coverage[open]{flex-basis:100%}.coverage p{max-width:100ch;margin:8px 0;white-space:pre-wrap}
+.workspace{display:grid;align-items:start;grid-template-columns:minmax(215px,1fr) minmax(0,2.5fr);gap:clamp(16px,2.5vw,40px);margin-top:20px}
+.inventory,.detail{min-width:0}.inventory header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.inventory h2{font-size:17px}.cards{display:grid;gap:6px;max-height:70vh;overflow:auto;padding:2px;scrollbar-width:thin}
+.card{min-width:0;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px;text-align:left}
+.card:hover,.filter:hover{border-color:var(--accent)}.card strong,.card small{display:block}.card strong{font-size:14px}.card small{font-size:12px}
+.thumb{display:grid;place-items:center;flex:0 0 50px;height:50px;background:var(--stage);overflow:hidden;border-radius:5px}
+.thumb img,.thumb canvas,.media img,.media canvas,.media video{width:100%;height:100%;min-height:0;object-fit:contain}
+.detail{padding:clamp(16px,2vw,30px);border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.detail h2{font-size:clamp(23px,2.6vw,36px);line-height:1.3;letter-spacing:-.035em}.id,.path,.ref code{font:12px/1.55 ui-monospace,monospace}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.tag{border:1px solid var(--line);border-radius:4px;padding:1px 7px;font-size:12px}.warn,.error{color:var(--accent)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px;margin-top:12px}
+.gallery figure{background:var(--stage);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.gallery figcaption{background:var(--panel);border-top:1px solid var(--line);padding:7px 12px}
+.media{height:clamp(170px,27vh,300px);padding:12px;display:grid;place-items:center}.media audio{max-width:100%}
+.detail section{margin-top:16px}.detail h3{font-size:14px;margin-bottom:5px}.ref{border-top:1px solid var(--line);padding:6px 0}.ref strong,.ref code{display:block}.note{white-space:pre-wrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+/* Atlas: the selected board occupies the main stage; browse neighboring layouts as contact sheets. */
+[data-layout=atlas] .workspace{grid-template-columns:minmax(0,1.8fr) minmax(240px,1fr);grid-template-areas:"detail inventory"}
+[data-layout=atlas] .inventory{grid-area:inventory}
+[data-layout=atlas] .detail{grid-area:detail}
+[data-layout=atlas] .cards{grid-template-columns:repeat(auto-fill,minmax(115px,1fr));max-height:74vh}
+[data-layout=atlas] .card{flex-direction:column;align-items:stretch;gap:5px}
+[data-layout=atlas] .thumb{flex:auto;height:80px;padding:4px}
+[data-layout=atlas] .card small,[data-layout=compare] .card small{display:none}
+[data-layout=atlas] .media{height:clamp(245px,38vh,440px)}
+/* Compare: a horizontal contact strip leaves the width of the page to the selected states. */
+[data-layout=compare] .workspace{display:block}
+[data-layout=compare] .cards{display:flex;overflow-x:auto;min-height:0;padding-bottom:5px}
+[data-layout=compare] .card{flex:0 0 90px;flex-direction:column;text-align:center;gap:3px}
+[data-layout=compare] .thumb{height:50px;width:100%;flex:auto;background:transparent}
+[data-layout=compare] .detail{margin-top:14px;border-radius:12px}
+[data-layout=compare] .gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+[data-layout=compare] .gallery figure:only-child{grid-column:1/-1}
+[data-layout=compare] .media{height:clamp(180px,26vh,350px)}
+@media(max-width:760px){
+  .head{flex-wrap:wrap;gap:10px}.workspace,[data-layout=atlas] .workspace{display:flex;flex-direction:column}
+  .inventory,.detail{width:100%}.coverage{margin-left:0}.cards,[data-layout=atlas] .cards{max-height:190px}
+  [data-layout=compare] .gallery{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}
+  [data-layout=compare] .media{height:170px}.thumb{height:42px;flex-basis:42px}
+}
+[data-layout=atlas] .gallery figure:first-child{grid-column:1/-1}
 </style>
 </head>
 <body>
-<div class="layout"><nav aria-label="资产分类"><div class="brand"><span class="mark" aria-hidden="true"></span>资产工作台</div><h2>按分类浏览</h2><div id="filters"></div></nav>
-<main><header class="head"><div><p class="mode" id="mode"></p><h1 id="title"></h1><p class="totals" id="totals"></p></div><label class="find"><span aria-hidden="true">⌕</span><span class="sr">搜索资产</span><input id="search" type="search" placeholder="搜索名称、场景、来源…" autocomplete="off"></label></header>
-<details class="coverage"><summary>盘点范围</summary><p id="coverage"></p></details>
-<div class="workspace"><section class="inventory"><header><h2 id="group">全部资产</h2><span id="count" aria-live="polite"></span></header><div id="cards" class="cards"></div></section><article id="detail" class="detail" aria-label="资产详情"></article></div></main></div>
+<main><header class="head"><div><p class="mode" id="mode"></p><h1 id="title"></h1><p class="totals" id="totals"></p></div><label class="find"><span aria-hidden="true">⌕</span><span class="sr">搜索资产</span><input id="search" type="search" placeholder="在分类中搜索名称、场景、来源…" autocomplete="off"></label></header>
+<nav aria-label="资产分类"><div id="filters"></div><details class="coverage"><summary>盘点范围</summary><p id="coverage"></p></details></nav>
+<div class="workspace"><section class="inventory"><header><h2 id="group">全部资产</h2><span id="count" aria-live="polite"></span></header><div id="cards" class="cards"></div></section><article id="detail" class="detail" aria-label="资产详情"></article></div></main>
 <script id="kit-data" type="application/json">/*__KIT_DATA__*/</script>
 <script>
 "use strict";
-const {root, manifest} = JSON.parse(document.getElementById("kit-data").textContent);
+const {root, manifest, view} = JSON.parse(document.getElementById("kit-data").textContent);
 const {items, files} = manifest;
+document.documentElement.dataset.layout = view.layout || "catalog";
+for (const [role,color] of Object.entries(view.colors || {})) {
+  document.documentElement.style.setProperty("--" + role,color);
+}
 const evidence = {used:"已定位用法", file:"仅发现文件", visual:"画面可见"};
 const statusNames = {added:"新增", changed:"变更", unchanged:"未变", removed:"退出盘点", missing:"来源缺失"};
 const $ = id => document.getElementById(id);
@@ -93,9 +144,17 @@ function detail(item) {
   const tags = el("div",undefined,"tags");
   tags.append(el("span",evidence[item.evidence],"tag"),el("span",statusNames[item.status],
     ["missing","removed"].includes(item.status) ? "tag warn" : "tag"));
+  const compactStates = view.layout === "compare" && item.states?.length && item.states.length <= 3;
+  if (compactStates) tags.append(el("span",item.states.join(" / "),"tag"));
   pane.append(tags);
   const gallery = el("div",undefined,"gallery");
-  for (const ref of item.sources.filter(s => s.preview && files[s.path])) {
+  const previews = item.sources.filter(s => s.preview && files[s.path]);
+  const order = view.previewOrder?.[item.id];
+  if (Array.isArray(order)) {
+    const rank = ref => order.includes(ref.preview) ? order.indexOf(ref.preview) : order.length;
+    previews.sort((a,b) => rank(a)-rank(b));
+  }
+  for (const ref of previews) {
     const figure = el("figure"), box = el("div",undefined,"media");
     const type = mediaType(ref.path);
     if (type === "img") loadImage(ref,box);
@@ -109,7 +168,7 @@ function detail(item) {
   }
   if (gallery.childElementCount) pane.append(gallery);
   else pane.append(el("p","此条目可从下方来源定位。","totals"));
-  if (item.states?.length) pane.append(section("状态",el("p",item.states.join("　/　"))));
+  if (item.states?.length && !compactStates) pane.append(section("状态",el("p",item.states.join("　/　"))));
   if (item.uses?.length) {
     const uses = section("使用场景",...item.uses.slice(0,2).map(reference));
     if (item.uses.length > 2) {
@@ -124,16 +183,31 @@ function detail(item) {
 }
 let category = null, selected;
 try { selected = decodeURIComponent(location.hash.slice(1)); } catch { selected = ""; }
+const opening = items.find(i => i.id === (selected || view.focus) && i.status !== "removed");
+if (opening) { selected = opening.id; category = opening.category; }
 const categories = new Map();
 for (const item of items) categories.set(item.category,(categories.get(item.category)||0)+1);
 function filters() {
   $("filters").replaceChildren();
-  for (const [key,count] of [[null,items.length],...categories]) {
+  const ordered = [...new Set([...(view.categories || []),...categories.keys()])].filter(k => categories.has(k));
+  const main = ordered.slice(0,4);
+  if (category && !main.includes(category)) main.push(category);
+  for (const key of [null,...main]) {
+    const count = key === null ? items.length : categories.get(key);
     const button = el("button",undefined,"filter");
     button.append(el("span",key ?? "全部资产"),el("small",count));
     button.setAttribute("aria-pressed",String(key === category));
     button.onclick = () => { category = key; filters(); list(); };
     $("filters").append(button);
+  }
+  if (ordered.length > 4) {
+    const select = el("select",undefined,"more");
+    select.setAttribute("aria-label","更多分类");
+    select.add(new Option("更多分类…",""));
+    for (const key of ordered.slice(4)) select.add(new Option(key,key));
+    select.value = ordered.slice(4).includes(category) ? category : "";
+    select.onchange = () => { category = select.value || null; filters(); list(); };
+    $("filters").append(select);
   }
 }
 const searchIndex = new Map(items.map(i => [i.id, [i.id,i.name,assetName(i),i.manual.note,i.category,
@@ -165,15 +239,19 @@ function list() {
     card.onclick = () => choose(item); $("cards").append(card);
   }
   detail(current);
+  const strip = $("cards"), active = strip.querySelector('[aria-current="true"]');
+  if (active && view.layout === "compare") {
+    strip.scrollLeft = active.offsetLeft - strip.offsetLeft - strip.clientWidth / 2 + active.offsetWidth / 2;
+  }
 }
 $("title").textContent = manifest.project;
 document.title = manifest.project + " · 资产工作台";
-$("mode").textContent = manifest.mode === "ui" ? "游戏 UI Kit" : "游戏资产库";
+$("mode").textContent = view.label || (manifest.mode === "ui" ? "游戏 UI Kit" : "游戏资产库");
 const active = items.filter(i => i.status !== "removed");
 const activeFiles = new Set(active.flatMap(i => [...i.sources,...(i.uses || [])].map(r => r.path)).filter(p => files[p]));
 $("totals").textContent = active.length + " 个对象　/　" + activeFiles.size + " 个引用文件" +
   (active.length < items.length ? "　/　" + (items.length-active.length) + " 项退出盘点" : "");
-$("coverage").textContent = manifest.coverage;
+$("coverage").textContent = [manifest.coverage,view.basis].filter(Boolean).join("\n");
 $("search").oninput = list;
 window.onhashchange = () => {
   let id; try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }

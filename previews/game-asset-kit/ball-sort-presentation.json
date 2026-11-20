@@ -1,0 +1,19 @@
+{
+  "layout": "atlas",
+  "label": "关卡图册",
+  "basis": "src/render/draw.ts 的棋盘底色、浅色文字和暖金操作提示用于舞台与选中状态。主预览展示开局，缩略图用于比较相邻关卡。",
+  "colors": {
+    "paper": "#191b1e",
+    "panel": "#252a32",
+    "ink": "#f4f5f7",
+    "accent": "#f3d99e",
+    "stage": "#191b1e"
+  },
+  "focus": "special.long-tubes-1",
+  "categories": [
+    "普通关布局",
+    "特殊关布局",
+    "彩球",
+    "游玩控件"
+  ]
+}
