@@ -70,6 +70,14 @@ nav{display:flex;align-items:center;gap:12px;border-block:1px solid var(--line);
   [data-layout=compare] .media{height:170px}.thumb{height:42px;flex-basis:42px}
 }
 [data-layout=atlas] .gallery figure:first-child{grid-column:1/-1}
+/* Give full UI screens room to read. Small components keep the compact comparison grid. */
+.detail .gallery:has(.screen-preview){grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));align-items:start}
+.gallery .screen-preview.landscape{grid-column:1/-1}
+.gallery .screen-preview.portrait{width:100%;max-width:440px}
+.detail .screen-preview .media{height:auto;padding:6px;display:block}
+.screen-preview .media :is(img,canvas){display:block;width:100%;height:auto}
+.screen-preview figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.screen-preview figcaption a{white-space:nowrap}
 /*__structures.css__*/
 </style>
 </head>
@@ -100,12 +108,16 @@ function el(tag, text, cls) {
 const assetName = item => item.manual.name || item.name;
 const url = path => root + path.split("/").map(encodeURIComponent).join("/");
 const mediaType = path => /\.(mp3|m4a|ogg|wav)$/i.test(path) ? "audio" : /\.(mp4|webm|mov)$/i.test(path) ? "video" : "img";
-function loadImage(ref, box) {
+function loadImage(ref, box, onSize) {
   const img = new Image();
   img.alt = ref.preview;
   img.loading = "lazy";
   img.onerror = () => box.replaceChildren(el("span","图片未载入","error"));
-  if (ref.rect) img.onload = () => {
+  img.onload = () => {
+    if (!ref.rect) {
+      onSize?.(img.naturalWidth,img.naturalHeight);
+      return;
+    }
     const [x,y,w,h] = ref.rect;
     if (x+w > img.naturalWidth || y+h > img.naturalHeight) {
       box.replaceChildren(el("span","裁切超出原图","error"));
@@ -118,6 +130,7 @@ function loadImage(ref, box) {
     canvas.setAttribute("aria-label",ref.preview);
     canvas.getContext("2d").drawImage(img,x,y,w,h,0,0,canvas.width,canvas.height);
     box.replaceChildren(canvas);
+    onSize?.(w,h);
   };
   img.src = url(ref.path);
   box.append(img);
@@ -159,15 +172,25 @@ function detail(item) {
   }
   for (const ref of previews) {
     const figure = el("figure"), box = el("div",undefined,"media");
+    const caption = el("figcaption",ref.preview);
     const type = mediaType(ref.path);
-    if (type === "img") loadImage(ref,box);
+    if (type === "img") loadImage(ref,box,(width,height) => {
+      if (manifest.mode !== "ui" || Math.min(width,height) < 240 || Math.max(width,height) < 420) return;
+      figure.classList.add("screen-preview",width >= height ? "landscape" : "portrait");
+      if (!ref.rect) {
+        const link = el("a","查看原图 ↗");
+        link.href = url(ref.path); link.target = "_blank"; link.rel = "noopener";
+        link.setAttribute("aria-label","查看原图：" + ref.preview);
+        caption.append(link);
+      }
+    });
     else {
       const player = el(type);
       player.src = url(ref.path); player.controls = true; player.preload = "none";
       player.setAttribute("aria-label",ref.preview);
       box.append(player);
     }
-    figure.append(box,el("figcaption",ref.preview)); gallery.append(figure);
+    figure.append(box,caption); gallery.append(figure);
   }
   if (gallery.childElementCount) pane.append(gallery);
   else pane.append(el("p","此条目可从下方来源定位。","totals"));
