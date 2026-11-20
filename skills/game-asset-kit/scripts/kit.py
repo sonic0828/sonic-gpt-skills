@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 from pathlib import Path, PurePosixPath
@@ -59,6 +60,10 @@ def validate(catalog, project):
         require(isinstance(sources, list) and sources, f"{key} 缺少来源")
         require(isinstance(uses, list) and evidence in ("used", "file", "visual")
                 and (evidence == "used") == bool(uses), f"{key} 的使用证据与 uses 不符")
+        attributes = item.get("attributes", {})
+        require(isinstance(attributes, dict) and all(string(k) and (
+            string(v) or type(v) is int or (type(v) is float and math.isfinite(v))
+        ) for k, v in attributes.items()), f"{key} 的 attributes 需要字段名称和文字或数值")
         states = item.get("states", [])
         require(isinstance(states, list) and all(string(s) for s in states), f"{key} 的 states 无效")
         for ref in sources + uses:
@@ -168,9 +173,24 @@ def read_presentation(out):
     if not path.exists():
         return {}
     view = read_json(path)
-    require(isinstance(view, dict) and view.get("layout") in ("atlas", "compare", "catalog"),
+    require(isinstance(view, dict) and view.get("layout", "catalog") in ("atlas", "compare", "catalog"),
             "presentation.json 的 layout 需为 atlas、compare 或 catalog")
     require(string(view.get("basis")), "请填写展示依据 basis")
+    structure = view.get("structure")
+    require(structure is None or structure in ("01", "02", "03", "04", "05", "06"),
+            "structure 需为 01 到 06 的字符串")
+    if structure == "06":
+        scenes = view.get("scenes")
+        require(isinstance(scenes, list) and scenes and all(
+            isinstance(scene, dict) and string(scene.get("name")) and string(scene.get("path"))
+            and PurePosixPath(scene["path"]).suffix.lower() in IMAGES for scene in scenes
+        ), "结构 06 需要有名称和图片路径的 scenes")
+    groups = view.get("groups", {})
+    require(isinstance(groups, dict) and all(string(k) and isinstance(cats, list)
+            and cats and all(string(c) for c in cats) for k, cats in groups.items()),
+            "groups 按工作范围列出对应分类")
+    columns = view.get("columns", [])
+    require(isinstance(columns, list) and all(string(k) for k in columns), "columns 需要属性名称列表")
     colors = view.get("colors", {})
     roles = {"paper", "panel", "ink", "accent", "stage"}
     require(isinstance(colors, dict) and colors.keys() <= roles and all(
@@ -188,9 +208,17 @@ def read_presentation(out):
 
 def render(manifest, project, out):
     prefix = quote(Path(os.path.relpath(project, out)).as_posix(), safe="/")
-    data = json.dumps({"root": prefix + "/", "manifest": manifest,
-                       "view": read_presentation(out)}, ensure_ascii=False)
-    return TEMPLATE.read_text(encoding="utf-8").replace("/*__KIT_DATA__*/", data.replace("<", "\\u003c"))
+    view = read_presentation(out)
+    if view.get("structure") == "06":
+        located = {s["path"] for item in manifest["items"] for s in item["sources"] if "rect" in s}
+        for scene in view["scenes"]:
+            source_path(project, scene["path"])
+            require(scene["path"] in located, f"场景缺少条目裁切区域：{scene['path']}")
+    data = json.dumps({"root": prefix + "/", "manifest": manifest, "view": view}, ensure_ascii=False)
+    template = TEMPLATE.read_text(encoding="utf-8")
+    for resource in ("structures.css", "structures.js"):
+        template = template.replace(f"/*__{resource}__*/", (TEMPLATE.parent / resource).read_text(encoding="utf-8"))
+    return template.replace("/*__KIT_DATA__*/", data.replace("<", "\\u003c"))
 
 
 def write_atomic(path, body):

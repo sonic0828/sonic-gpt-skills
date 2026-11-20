@@ -70,6 +70,7 @@ nav{display:flex;align-items:center;gap:12px;border-block:1px solid var(--line);
   [data-layout=compare] .media{height:170px}.thumb{height:42px;flex-basis:42px}
 }
 [data-layout=atlas] .gallery figure:first-child{grid-column:1/-1}
+/*__structures.css__*/
 </style>
 </head>
 <body>
@@ -85,6 +86,8 @@ document.documentElement.dataset.layout = view.layout || "catalog";
 for (const [role,color] of Object.entries(view.colors || {})) {
   document.documentElement.style.setProperty("--" + role,color);
 }
+const structure = view.structure || "";
+document.documentElement.dataset.structure = structure;
 const evidence = {used:"已定位用法", file:"仅发现文件", visual:"画面可见"};
 const statusNames = {added:"新增", changed:"变更", unchanged:"未变", removed:"退出盘点", missing:"来源缺失"};
 const $ = id => document.getElementById(id);
@@ -179,17 +182,30 @@ function detail(item) {
     pane.append(uses);
   }
   pane.append(section("来源文件",...item.sources.map(reference)));
+  if (Object.keys(item.attributes || {}).length) {
+    const values = el("dl",undefined,"facts");
+    for (const [label,value] of Object.entries(item.attributes)) values.append(el("dt",label),el("dd",value));
+    pane.append(section("属性",values));
+  }
   if (item.manual.note) pane.append(section("人工备注",el("p",item.manual.note,"note")));
 }
 let category = null, selected;
 try { selected = decodeURIComponent(location.hash.slice(1)); } catch { selected = ""; }
 const opening = items.find(i => i.id === (selected || view.focus) && i.status !== "removed");
-if (opening) { selected = opening.id; category = opening.category; }
+if (opening) { selected = opening.id; category = ["05","06"].includes(structure) ? null : opening.category; }
 const categories = new Map();
 for (const item of items) categories.set(item.category,(categories.get(item.category)||0)+1);
+const groups = structure === "03" ? Object.entries(view.groups || {}).filter(([,cats]) => cats.some(c => categories.has(c))) : [];
+let scope = groups.find(([,cats]) => cats.includes(category))?.[0] || null;
+function scopeCategories() { return groups.find(([name]) => name === scope)?.[1]; }
 function filters() {
   $("filters").replaceChildren();
   const ordered = [...new Set([...(view.categories || []),...categories.keys()])].filter(k => categories.has(k));
+  if (groups.length) {
+    $("subcategories").replaceChildren();
+    appendScopeFilters(ordered);
+    return;
+  }
   const main = ordered.slice(0,4);
   if (category && !main.includes(category)) main.push(category);
   for (const key of [null,...main]) {
@@ -211,36 +227,40 @@ function filters() {
   }
 }
 const searchIndex = new Map(items.map(i => [i.id, [i.id,i.name,assetName(i),i.manual.note,i.category,
-  ...(i.states || []),...i.sources.flatMap(s => [s.path,s.locator,s.preview]),
-  ...(i.uses || []).flatMap(u => [u.scene,u.path,u.locator])].filter(Boolean).join(" ").toLowerCase()]));
+  ...Object.entries(i.attributes || {}).flat(),...(i.states || []),...i.sources.flatMap(s => [s.path,s.locator,s.preview]),
+  ...(i.uses || []).flatMap(u => [u.scene,u.path,u.locator])].filter(v => v != null && v !== "").join(" ").toLowerCase()]));
 function choose(item) {
   selected = item.id;
   location.hash = encodeURIComponent(selected);
-  for (const card of $("cards").children) card.setAttribute("aria-current",String(card.dataset.id === selected));
+  for (const card of document.querySelectorAll("[data-item-id]")) card.setAttribute("aria-current",String(card.dataset.itemId === selected));
   detail(item);
-  if (matchMedia("(max-width:760px)").matches) $("detail").scrollIntoView({block:"start"});
+  showSelection(item);
 }
 function list() {
   const query = $("search").value.trim().toLowerCase();
-  const visible = items.filter(i => (category === null || i.category === category) && searchIndex.get(i.id).includes(query));
+  const allowed = scopeCategories();
+  const visible = items.filter(i => (!allowed || allowed.includes(i.category)) && (category === null || i.category === category) && searchIndex.get(i.id).includes(query));
   const current = visible.find(i => i.id === selected) || visible[0];
   selected = current?.id;
-  $("cards").replaceChildren(); $("group").textContent = category ?? "全部资产";
+  $("cards").replaceChildren(); $("group").textContent = category ?? scope ?? "全部资产";
   $("count").textContent = visible.length + " 项";
-  for (const item of visible) {
+  if (structure === "05") renderTable(visible);
+  else for (const item of visible) {
     const card = el("button",undefined,"card"), thumb = el("span",undefined,"thumb");
     const preview = item.sources.find(s => s.preview && files[s.path] && mediaType(s.path) === "img");
     if (preview) loadImage(preview,thumb);
     else thumb.textContent = item.sources.some(s => s.preview) ? "▷" : "⌘";
     const words = el("span");
     words.append(el("strong",assetName(item)),el("small",item.category + " · " + evidence[item.evidence]));
-    card.append(thumb,words); card.dataset.id = item.id;
+    card.append(thumb,words); card.dataset.itemId = item.id;
     card.setAttribute("aria-current",String(item === current));
     card.onclick = () => choose(item); $("cards").append(card);
   }
   detail(current);
+  if (!visible.length && structure === "04") $("cards").append(el("p","没有符合条件的条目。","empty"));
+  if (structure === "06") { sceneIndex = sceneFor(current); renderScene(visible); }
   const strip = $("cards"), active = strip.querySelector('[aria-current="true"]');
-  if (active && view.layout === "compare") {
+  if (active && (structure === "01" || (!structure && view.layout === "compare"))) {
     strip.scrollLeft = active.offsetLeft - strip.offsetLeft - strip.clientWidth / 2 + active.offsetWidth / 2;
   }
 }
@@ -253,12 +273,16 @@ $("totals").textContent = active.length + " 个对象　/　" + activeFiles.size
   (active.length < items.length ? "　/　" + (items.length-active.length) + " 项退出盘点" : "");
 $("coverage").textContent = [manifest.coverage,view.basis].filter(Boolean).join("\n");
 $("search").oninput = list;
+/*__structures.js__*/
+setupStructure();
 window.onhashchange = () => {
   let id; try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
-  if (id === selected) return;
-  if (items.some(i => i.id === id)) { selected = id; category = null; $("search").value = ""; filters(); list(); }
+  if (!id && drawer?.open) drawer.close();
+  if (id === selected) { if (id && drawer && !drawer.open) openDrawer(); return; }
+  if (items.some(i => i.id === id)) { selected = id; category = null; scope = null; $("search").value = ""; filters(); list(); if (drawer) openDrawer(); }
 };
 filters(); list();
+if (drawer && opening && location.hash) openDrawer();
 </script>
 </body>
 </html>

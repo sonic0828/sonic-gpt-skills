@@ -111,6 +111,40 @@ class WorkbenchTest(unittest.TestCase):
         self.cli("check", success=False)
         self.cli("build", success=False)
 
+    def test_switching_structures_keeps_attributes_and_manual_fields(self):
+        self.item["attributes"] = {"价格": 0, "材质": "水晶"}
+        config = self.out / "presentation.json"
+        view = {"basis": "核对道具价格", "structure": "05", "columns": ["价格"]}
+        config.write_text(json.dumps(view))
+        self.item_after_build()
+        manifest = json.loads(self.manifest_path.read_text())
+        manual = {"name": "免费宝石", "note": "新手奖励"}
+        manifest["items"][0]["manual"] = manual
+        self.manifest_path.write_text(json.dumps(manifest))
+        view.update(structure="03", groups={"商店": ["道具"]})
+        config.write_text(json.dumps(view))
+        item = self.item_after_build()
+        self.assertEqual((item["id"], item["manual"], item["attributes"]),
+                         ("gem", manual, self.item["attributes"]))
+        view["structure"] = "07"
+        config.write_text(json.dumps(view))
+        before = (self.out / "index.html").read_bytes()
+        self.cli("build", success=False)
+        self.assertEqual((self.out / "index.html").read_bytes(), before)
+
+    def test_each_scene_requires_an_object_region_on_that_image(self):
+        config = self.out / "presentation.json"
+        scenes = [{"name": "营地", "path": "camp.svg"}, {"name": "矿区", "path": "mine.svg"}]
+        config.write_text(json.dumps({"structure": "06", "scenes": scenes, "basis": "点选地标"}))
+        for scene in scenes:
+            (self.project / scene["path"]).write_text('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"/>')
+            self.item["sources"].append({"path": scene["path"]})
+        self.item["sources"][1]["rect"] = [0, 0, 4, 4]
+        self.cli("build", success=False)
+        self.assertFalse(self.manifest_path.exists())
+        self.item["sources"][2]["rect"] = [2, 2, 4, 4]
+        self.assertEqual(self.item_after_build()["sources"], self.item["sources"])
+
 
 if __name__ == "__main__":
     unittest.main()
