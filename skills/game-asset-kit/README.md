@@ -56,19 +56,19 @@ python3 "$SKILL_DIR/scripts/kit.py" check --project "$GAME" --out "$OUT"
 
 双击终端输出路径中的 `index.html`，搜索「烤番茄」。可以查看 450 ms 的成盘画面，再点来源文件打开整张截图。对自己的项目执行相同命令时，把 `GAME` 换成游戏根目录，`OUT` 换成含有该游戏 `catalog.json` 的开发目录。
 
-## 四个来源案例
+## 随包试跑的四个来源案例
 
-以下图片来自两个游戏原有的开发工作台。每个案例说明一种值得保留的证据。
+以下四张网页截图也是试跑命令的输入。每张保留工作台导航和对照区域，清单中的像素坐标指向相应组件或素材。
 
 ### 货柜收纳消 · 设置开关
 
-看中间卡片的「开」状态和「放入页面」入口。`js/game/ui-skin.js` 的 `toggle` 绘制开关，`settingsDialog` 在首页设置与暂停面板复用它，音效、音乐和振动读取各自的开关值。图为 `docs/evidence/ui-kit/components.png` 的原尺寸局部。
+看「按钮」分类里设置开关的「开」状态和「放入页面」入口。`js/game/ui-skin.js` 的 `toggle` 绘制开关，`settingsDialog` 在首页设置与暂停面板复用它，音效、音乐和振动读取各自的开关值。图中还可以看到同一分类的其他按钮。
 
 ![设置开关与相邻控件](references/cases/source-goods-ui.png)
 
 ### 货柜收纳消 · 货架商品
 
-看两列商品的脚底和后排暗度。左侧牛奶对应 `assets/goods/p1_001.png`，清单键为 `milk`，第 2 关的 s0 前排第 3 格就摆着牛奶。`dev/goods-preview.js` 的 `GoodsPreview.draw` 让苹果候选使用同一组格位。图取自 `docs/evidence/browser-goods-kit-shelf.png`。
+看两列商品的脚底和后排暗度。左侧牛奶对应 `assets/goods/p1_001.png`，清单键为 `milk`，第 2 关的 s0 前排第 3 格就摆着牛奶。`dev/goods-preview.js` 的 `GoodsPreview.draw` 让苹果候选使用同一组格位。图中上方的货柜控件可以切换预览场景。
 
 ![牛奶与苹果候选的同格对照](references/cases/source-goods-shelf.png)
 
